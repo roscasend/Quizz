@@ -49,8 +49,34 @@ public class QuestionEntity {
     protected QuestionEntity() {
     }
 
+    public QuestionEntity(
+            String id,
+            QuizEntity quiz,
+            int questionOrder,
+            String questionText,
+            String code,
+            String explanation,
+            QuestionTypeEntity questionType) {
+        this.id = id;
+        this.quiz = quiz;
+        this.questionOrder = questionOrder;
+        this.questionText = questionText;
+        this.code = code;
+        this.explanation = explanation == null ? "" : explanation;
+        this.questionType = questionType;
+    }
+
+    public void addAnswer(AnswerEntity answer) {
+        answers.add(answer);
+        answer.assignToQuestion(this);
+    }
+
     public String getId() {
         return id;
+    }
+
+    public int getQuestionOrder() {
+        return questionOrder;
     }
 
     public String getQuestionText() {

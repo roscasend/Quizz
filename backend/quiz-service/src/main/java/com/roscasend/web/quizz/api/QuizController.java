@@ -1,16 +1,21 @@
 package com.roscasend.web.quizz.api;
 
+import com.roscasend.web.quizz.api.dto.AnswerDto;
+import com.roscasend.web.quizz.api.dto.QuestionDto;
 import com.roscasend.web.quizz.api.dto.QuizDto;
 import com.roscasend.web.quizz.api.dto.QuizResultDto;
 import com.roscasend.web.quizz.api.dto.QuizSummaryDto;
 import com.roscasend.web.quizz.database.QuizTypeEntity;
+import com.roscasend.web.quizz.service.QuestionManagementService;
 import com.roscasend.web.quizz.service.QuizService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -19,9 +24,11 @@ import java.util.List;
 @RequestMapping("/api/quizzes")
 public class QuizController {
     private final QuizService quizService;
+    private final QuestionManagementService questionManagementService;
 
-    public QuizController(QuizService quizService) {
+    public QuizController(QuizService quizService, QuestionManagementService questionManagementService) {
         this.quizService = quizService;
+        this.questionManagementService = questionManagementService;
     }
 
     @GetMapping
@@ -46,5 +53,22 @@ public class QuizController {
             @PathVariable String quizId,
             @RequestBody(required = false) QuizSubmissionRequest request) {
         return quizService.submitQuiz(quizId, request);
+    }
+
+    @PostMapping("/{quizId}/questions")
+    @ResponseStatus(HttpStatus.CREATED)
+    public QuestionDto addQuestion(
+            @PathVariable String quizId,
+            @RequestBody(required = false) QuestionCreateRequest request) {
+        return questionManagementService.addQuestion(quizId, request);
+    }
+
+    @PostMapping("/{quizId}/questions/{questionId}/answers")
+    @ResponseStatus(HttpStatus.CREATED)
+    public AnswerDto addAnswer(
+            @PathVariable String quizId,
+            @PathVariable String questionId,
+            @RequestBody(required = false) AnswerCreateRequest request) {
+        return questionManagementService.addAnswer(quizId, questionId, request);
     }
 }

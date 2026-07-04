@@ -30,8 +30,23 @@ public class AnswerEntity {
     protected AnswerEntity() {
     }
 
+    public AnswerEntity(String id, int answerOrder, String answerText, boolean correct) {
+        this.id = id;
+        this.answerOrder = answerOrder;
+        this.answerText = answerText;
+        this.correct = correct;
+    }
+
+    void assignToQuestion(QuestionEntity question) {
+        this.question = question;
+    }
+
     public String getId() {
         return id;
+    }
+
+    public int getAnswerOrder() {
+        return answerOrder;
     }
 
     public String getAnswerText() {

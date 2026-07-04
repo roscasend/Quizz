@@ -82,6 +82,93 @@ class QuizControllerTest {
     }
 
     @Test
+    void addQuestionCreatesQuestionWithAnswers() throws Exception {
+        mockMvc.perform(post("/api/quizzes/java-final-sample/questions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                                """
+                                {
+                                  "id": "q-added-crud",
+                                  "text": "Which keyword prevents reassignment?",
+                                  "code": null,
+                                  "explanation": "final prevents reassignment after initialization.",
+                                  "type": "SINGLE_CHOICE",
+                                  "answers": [
+                                    {
+                                      "id": "final-keyword",
+                                      "text": "final",
+                                      "correct": true
+                                    },
+                                    {
+                                      "id": "static-keyword",
+                                      "text": "static",
+                                      "correct": false
+                                    }
+                                  ]
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value("q-added-crud"))
+                .andExpect(jsonPath("$.text").value("Which keyword prevents reassignment?"))
+                .andExpect(jsonPath("$.answers[0].id").value("final-keyword"))
+                .andExpect(content().string(not(containsString("correct"))));
+
+        mockMvc.perform(get("/api/quizzes/java-final-sample"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("q-added-crud")));
+    }
+
+    @Test
+    void addAnswerAppendsAnswerToQuestion() throws Exception {
+        mockMvc.perform(post("/api/quizzes/java-final-sample/questions/qf1/answers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                                """
+                                {
+                                  "id": "interpreted-only",
+                                  "text": "Java is interpreted only.",
+                                  "correct": false
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value("interpreted-only"))
+                .andExpect(jsonPath("$.text").value("Java is interpreted only."))
+                .andExpect(content().string(not(containsString("correct"))));
+
+        mockMvc.perform(get("/api/quizzes/java-final-sample"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("interpreted-only")));
+    }
+
+    @Test
+    void addQuestionRejectsInvalidAnswerSet() throws Exception {
+        mockMvc.perform(post("/api/quizzes/java-final-sample/questions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(
+                                """
+                                {
+                                  "id": "q-invalid-single-choice",
+                                  "text": "Which answers are correct?",
+                                  "explanation": "Only one correct answer is allowed for single choice questions.",
+                                  "type": "SINGLE_CHOICE",
+                                  "answers": [
+                                    {
+                                      "id": "q-invalid-a",
+                                      "text": "A",
+                                      "correct": true
+                                    },
+                                    {
+                                      "id": "q-invalid-b",
+                                      "text": "B",
+                                      "correct": true
+                                    }
+                                  ]
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void unknownQuizReturnsNotFound() throws Exception {
         mockMvc.perform(get("/api/quizzes/missing"))
                 .andExpect(status().isNotFound());
