@@ -7,6 +7,7 @@ Enterprise learning project built as a monorepo.
 ```text
 quiz-platform
 ├── backend
+│   ├── docker-compose.yml
 │   └── quiz-service
 ├── frontend
 ├── mobile
@@ -24,6 +25,12 @@ Run all backend tests from the repository root:
 ./mvnw clean test
 ```
 
+Start the local PostgreSQL database:
+
+```bash
+docker compose -f backend/docker-compose.yml up -d quiz-postgres
+```
+
 Run the quiz service:
 
 ```bash
@@ -33,6 +40,10 @@ Run the quiz service:
 Available endpoints:
 
 ```text
+GET  http://localhost:8080/api/quizzes
+GET  http://localhost:8080/api/quizzes?categoryName=Java%20Basics
+GET  http://localhost:8080/api/quizzes?type=FINAL_TEST
+GET  http://localhost:8080/api/quizzes/categories
 GET  http://localhost:8080/api/quizzes/java-basics
 POST http://localhost:8080/api/quizzes/java-basics/submissions
 ```

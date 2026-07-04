@@ -27,9 +27,38 @@ class QuizControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("java-basics"))
                 .andExpect(jsonPath("$.title").value("Java Basics"))
+                .andExpect(jsonPath("$.type").value("CHAPTER_TEST"))
+                .andExpect(jsonPath("$.categoryName").value("Java Basics"))
                 .andExpect(jsonPath("$.questions[0].id").value("q1"))
                 .andExpect(jsonPath("$.questions[0].answers[0].id").value("a"))
                 .andExpect(content().string(not(containsString("correct"))));
+    }
+
+    @Test
+    void getCategoriesReturnsChapterCategories() throws Exception {
+        mockMvc.perform(get("/api/quizzes/categories"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]").value("Java Basics"));
+    }
+
+    @Test
+    void getQuizzesCanFilterByChapterCategory() throws Exception {
+        mockMvc.perform(get("/api/quizzes")
+                        .param("categoryName", "Java Basics"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("java-basics"))
+                .andExpect(jsonPath("$[0].type").value("CHAPTER_TEST"))
+                .andExpect(jsonPath("$[0].categoryName").value("Java Basics"));
+    }
+
+    @Test
+    void getQuizzesCanFilterFinalTests() throws Exception {
+        mockMvc.perform(get("/api/quizzes")
+                        .param("type", "FINAL_TEST"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("java-final-sample"))
+                .andExpect(jsonPath("$[0].type").value("FINAL_TEST"))
+                .andExpect(jsonPath("$[0].categoryName").doesNotExist());
     }
 
     @Test

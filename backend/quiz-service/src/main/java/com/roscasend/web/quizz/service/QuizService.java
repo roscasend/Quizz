@@ -1,15 +1,17 @@
 package com.roscasend.web.quizz.service;
 
-import com.roscasend.web.quizz.QuestionReview;
-import com.roscasend.web.quizz.QuizResult;
-import com.roscasend.web.quizz.api.AnswerDto;
-import com.roscasend.web.quizz.api.QuestionDto;
-import com.roscasend.web.quizz.api.QuestionReviewDto;
-import com.roscasend.web.quizz.api.QuizDto;
-import com.roscasend.web.quizz.api.QuizResultDto;
+import com.roscasend.web.quizz.domain.QuestionReview;
+import com.roscasend.web.quizz.domain.QuizResult;
+import com.roscasend.web.quizz.api.dto.AnswerDto;
+import com.roscasend.web.quizz.api.dto.QuestionDto;
+import com.roscasend.web.quizz.api.dto.QuestionReviewDto;
+import com.roscasend.web.quizz.api.dto.QuizDto;
+import com.roscasend.web.quizz.api.dto.QuizResultDto;
+import com.roscasend.web.quizz.api.dto.QuizSummaryDto;
 import com.roscasend.web.quizz.api.QuizSubmissionRequest;
-import com.roscasend.web.quizz.answer.AnswerView;
-import com.roscasend.web.quizz.question.QuestionView;
+import com.roscasend.web.quizz.domain.answer.AnswerView;
+import com.roscasend.web.quizz.database.QuizTypeEntity;
+import com.roscasend.web.quizz.domain.question.QuestionView;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,7 +33,22 @@ public class QuizService {
         List<QuestionDto> questions = quizDefinition.quiz().getQuestions().stream()
                 .map(this::toQuestionDto)
                 .toList();
-        return new QuizDto(quizDefinition.id(), quizDefinition.title(), questions);
+        return new QuizDto(
+                quizDefinition.id(),
+                quizDefinition.title(),
+                quizDefinition.type(),
+                quizDefinition.categoryName(),
+                questions);
+    }
+
+    public List<QuizSummaryDto> getQuizzes(String categoryName, QuizTypeEntity quizType) {
+        return quizCatalog.findQuizzes(categoryName, quizType).stream()
+                .map(this::toQuizSummaryDto)
+                .toList();
+    }
+
+    public List<String> getCategories() {
+        return quizCatalog.findCategories();
     }
 
     public QuizResultDto submitQuiz(String quizId, QuizSubmissionRequest request) {
@@ -62,6 +79,14 @@ public class QuizService {
 
     private AnswerDto toAnswerDto(AnswerView answer) {
         return new AnswerDto(answer.getId(), answer.getText());
+    }
+
+    private QuizSummaryDto toQuizSummaryDto(QuizSummaryDefinition quiz) {
+        return new QuizSummaryDto(
+                quiz.id(),
+                quiz.title(),
+                quiz.type(),
+                quiz.categoryName());
     }
 
     private QuizResultDto toResultDto(QuizResult result) {
